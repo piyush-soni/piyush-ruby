@@ -4,6 +4,15 @@ class String
   end
 end
 
+class Node
+  attr_accessor :value, :next
+
+  def initialize(value, temp=nil)
+    @value = value
+    @next = temp
+  end
+end
+
 class TreeNode
   attr_accessor :value, :left, :right
 
@@ -24,14 +33,14 @@ class BST
     @root = nil
     @size = 0
   end
-  
+
   def insert(value)
     if @root == nil
       @root = TreeNode.new(value)
     else
       cur = @root
       prev = @root
-      
+
       while cur != nil
         prev = cur
         cur = value<cur.value ? cur.left : cur.right
@@ -51,8 +60,8 @@ class BST
     arr = f.readlines.map(&:chomp)
     inorder = arr[0].split(" ").map(&:to_i)
     preorder = arr[1].split(" ").map(&:to_i)
-    @size = inorder.size
     @preIndex = 0
+    @size = inorder.size
     @root = build(inorder, preorder, 0, inorder.size-1)
   end
 
@@ -94,7 +103,7 @@ class BST
       return true
     end
   end
-  
+
   def print_inorder(node = self.root)
     if node != nil
       print_inorder(node.left)
@@ -178,7 +187,7 @@ class BST
     else
       path << node.value
     end
-      
+
     l+=1
     if node.left == nil && node.right == nil
       printArr(path, l)
@@ -224,99 +233,260 @@ class BST
   end
 end
 
-t = BST.new()
+class LinkedList
 
-while true
-  puts "Select from the given options"
-  puts "  Enter 0: to insert multiple elements"
-  puts "  Enter 1: to insert value"
-  puts "  Enter 2: to delete value"
-  puts "  Enter 3: to print BST"
-  puts "  Enter 4: to find Max"
-  puts "  Enter 5: to find Min"
-  puts "  Enter 6: to find if value exists"
-  puts "  Enter 7: to print all paths from root"
-  puts "  Enter 8: to load a new bst from the file"
-  puts "  Enter quit to save and exit"
-  puts "  Enter anything else to exit"
-
-  option = gets.chomp
-  system("clear")
-  if !option.is_i?
-    t.save() if option.downcase == "quit"
-    break
-  end
-  option = option.to_i
-
-  if option == 0
-    puts "enter multiple elements sepreated with ,"
-    arr = gets.chomp.split(",").map(&:to_i)
-    arr.each{|i| t.insert(i)}
-    puts "\n\n"
-    next
+  def initialize
+    @head = nil
   end
 
-  if option == 1
-    puts "Enter the value you want to insert"
-    v = gets.to_i
-    t.insert(v)
-    puts "\n#{v} was inserted in the tree"
-    puts "size of the tree now is #{t.size} \n\n"
-    next
-  end
-
-  if option == 2
-    puts "Enter the value you want to delete"
-    v = gets.to_i
-    if t.contains?(v)
-      t.remove(v)
-      puts "\n#{v} was deleted from the tree"
-      puts "size of the tree now is #{t.size} \n\n"
+  def append(value)
+    if @head
+      find_tail.next = Node.new(value)
     else
-      puts "value not found can't delete it \n\n"
+      @head = Node.new(value)
     end
-    next
   end
 
-  if option == 3
-    puts "Printing the tree in InOrder"
-    t.print_inorder()
-    puts "end\n Printing the tree in PreOrder"
-    t.print_preorder()
-    puts "end\n Printing the tree in PostOrder"
-    t.print_postorder()
-    puts "end\n Printing the tree in LevelOrder"
-    t.print_levelorder()
-    puts "end\n\n"
-    next
+  def find_tail
+    node = @head
+    return node if !node.next
+    return node if !node.next while (node = node.next)
   end
 
-  if option == 4
-    puts "the maximum is #{t.find_max().value}\n\n"
-    next
+  def append_after(target, value)
+    node = find(target)
+    return unless node
+    node.next = Node.new(value, node.next)
   end
 
-  if option == 5
-    puts "the minimum is #{t.find_min().value}\n\n"
-    next
+  def find(value)
+    node = @head
+    return false if node == nil
+    while node != nil
+      return true if node.value == value
+      node = node.next
+    end
+    return false
   end
 
-  if option == 6
-    puts "Enter value to search it in treee"
-    v = t.contains(gets.to_i)
-    puts v ? "value exists" : "value does't exists"
-    next
+  def delete(value)
+    if @head == nil || !find(value)
+      puts "not in the list"
+      return nil
+    end
+    if @head.value == value
+      @head = @head.next
+    else
+      node = find_before(value)
+      node.next = node.next.next
+    end
+    puts "#{value} is deleted\n\n"
   end
 
-  if option == 7
-    puts "Printing all paths from Root"
-    t.pathp()
-    puts "\n\n"
-    next
+  def find_before(value)
+    node = @head
+
+    return false if !node.next
+    return node  if node.next.value == value
+
+    while (node = node.next)
+      return node if node.next && node.next.value == value
+    end
   end
 
-  if option == 8
-    t.loadit()
-    puts "Data loaded from the file\n\n"
+  def reverse()
+    return nil if @head == nil
+    prev = nil
+    curr = @head
+    while curr!=nil
+      nxt = curr.next
+      curr.next = prev
+      prev = curr
+      curr = nxt
+    end
+    @head = prev
+  end
+
+  def printll()
+    if @head == nil
+      puts "Empty list"
+      return nil
+    end
+    puts "Printing the Linked List"
+    node = @head
+    print "#{node.value}, "
+
+    while (node = node.next)
+      print "#{node.value}, "
+    end
+    puts "end"
   end
 end
+
+
+t = BST.new()
+ll = LinkedList.new()
+
+def ll_menu(ll)
+  while true
+    puts "Select from the given options"
+    puts "  Enter 1 to insert into end of linked list"
+    puts "  Enter 2 to delete a value"
+    puts "  Enter 3 to search a value"
+    puts "  Enter 4 to reverse the linked list"
+    puts "  Enter 5 to print the linked list"
+    puts "  Enter anything else to go to main menu"
+
+    option = gets.chomp
+    system("clear")
+    break unless option.is_i?
+    option = option.to_i
+
+    if option == 1
+      puts "enter the value you want to insert"
+      v = gets.chomp.to_i
+      ll.append(v)
+      puts "#{v} inserted in the end of linked list\n"
+      next
+    end
+
+    if option == 2
+      puts "enter the value you want to delete"
+      v = gets.chomp.to_i
+      ll.delete(v)
+      next
+    end
+
+    if option == 3
+      puts "enter the value you want to find"
+      v = gets.chomp.to_i
+      puts ll.find(v) ? "value found" : "value not found"
+      next
+    end
+
+    if option == 4
+      puts "the linked list is reversed"
+      ll.reverse()
+      next
+    end
+
+    if option == 5
+      ll.printll()
+      next
+    end
+  end
+end
+
+def bst_menu(t)
+
+  while true
+    puts "Select from the given options"
+    puts "  Enter 0: to insert multiple elements"
+    puts "  Enter 1: to insert value"
+    puts "  Enter 2: to delete value"
+    puts "  Enter 3: to print BST"
+    puts "  Enter 4: to find Max"
+    puts "  Enter 5: to find Min"
+    puts "  Enter 6: to find if value exists"
+    puts "  Enter 7: to print all paths from root"
+    puts "  Enter 8: to load the last saved bst"
+    puts "  Enter quit to save and exit to main menu"
+    puts "  Enter anything else to go to main menu"
+
+    option = gets.chomp
+    system("clear")
+    if !option.is_i?
+      t.save() if option.downcase == "quit"
+      break
+    end
+    option = option.to_i
+
+    if option == 0
+      puts "enter multiple elements sepreated with ,"
+      arr = gets.chomp.split(",").map(&:to_i)
+      arr.each{|i| t.insert(i)}
+      puts "\n\n"
+      next
+    end
+
+    if option == 1
+      puts "Enter the value you want to insert"
+      v = gets.to_i
+      t.insert(v)
+      puts "\n#{v} was inserted in the tree"
+      puts "size of the tree now is #{t.size} \n\n"
+      next
+    end
+
+    if option == 2
+      puts "Enter the value you want to delete"
+      v = gets.to_i
+      if t.contains?(v)
+        t.remove(v)
+        puts "\n#{v} was deleted from the tree"
+        puts "size of the tree now is #{t.size} \n\n"
+      else
+        puts "value not found can't delete it \n\n"
+      end
+      next
+    end
+
+    if option == 3
+      puts "Printing the tree in InOrder"
+      t.print_inorder()
+      puts "end\n Printing the tree in PreOrder"
+      t.print_preorder()
+      puts "end\n Printing the tree in PostOrder"
+      t.print_postorder()
+      puts "end\n Printing the tree in LevelOrder"
+      t.print_levelorder()
+      puts "end\n\n"
+      next
+    end
+
+    if option == 4
+      puts "the maximum is #{t.find_max().value}\n\n"
+      next
+    end
+
+    if option == 5
+      puts "the minimum is #{t.find_min().value}\n\n"
+      next
+    end
+
+    if option == 6
+      puts "Enter value to search it in treee"
+      v = t.contains?(gets.to_i)
+      puts v ? "value exists" : "value does't exists"
+      next
+    end
+
+    if option == 7
+      puts "Printing all paths from Root"
+      t.pathp()
+      puts "\n\n"
+      next
+    end
+
+    if option == 8
+      t.loadit()
+      puts "Data loaded from the file\n\n"
+    end
+  end
+end
+
+while true
+  # option to choose between LL and bst
+  puts "Select the tool to use"
+  puts "  Enter 1: for using BST functions"
+  puts "  Enter 2: for using LL functions"
+  puts "  Enter 'exit' to quit the tool"
+  o = gets.chomp
+  break if o.downcase == "exit"
+  o = o.to_i
+  system("clear")
+  bst_menu(t) if o == 1
+  ll_menu(ll) if o == 2
+  puts "Incorrect input try again\n" if o!=1 && o!=2
+end
+system("clear")
