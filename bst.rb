@@ -1,3 +1,10 @@
+=begin
+This function is created so we don't have 
+to write the same code every time when we
+want to check if a string is a integer in
+double quotes
+=end
+
 class String
   def is_i?
     /\A[-+]?\d+\z/ === self
@@ -7,18 +14,18 @@ end
 class TreeNode
   attr_accessor :value, :left, :right
 
-  def initialize(value)
+  def initialize(value, left = nil, right = nil)
     @value = value
-    @left = nil
-    @right = nil
+    @left = left
+    @right = right
   end
 end
 
 class BST
-  attr_accessor :root, :size, :pi, :pp
+  attr_accessor :root, :size, :inorder_array, :preorder_array
 
-  @pi = []
-  @pp = []
+  @inorder_array = []
+  @preorder_array = []
 
   def initialize()
     @root = nil
@@ -26,15 +33,15 @@ class BST
   end
   
   def insert(value)
-    if @root == nil
+    if !@root
       @root = TreeNode.new(value)
     else
       cur = @root
       prev = @root
       
-      while cur != nil
+      while cur
         prev = cur
-        cur = value<cur.value ? cur.left : cur.right
+        cur = value < cur.value ? cur.left : cur.right
       end
 
       if value < prev.value
@@ -43,10 +50,10 @@ class BST
         prev.right = TreeNode.new(value)
       end
     end
-    @size +=1
+    @size += 1
   end
 
-  def loadit()
+  def load_data()
     f = open("data_bst.txt")
     arr = f.readlines.map(&:chomp)
     inorder = arr[0].split(" ").map(&:to_i)
@@ -67,6 +74,8 @@ class BST
     temp
   end
 
+  # this search function is used for rebuilding
+  # the tree from the file input
   def search(arr, s, e, val)
     s..(e+1).times{|n| return n if arr[n] == val}
   end
@@ -83,20 +92,20 @@ class BST
     find_min(node.left)
   end
 
-  def contains?(value, node = self.root)
+  def does_it_contains(value, node = self.root)
     if node == nil
       return false
     elsif value < node.value
-      return contains?(value, node.left)
+      return does_it_contains(value, node.left)
     elsif value > node.value
-      return contains?(value, node.right)
+      return does_it_contains(value, node.right)
     else
       return true
     end
   end
   
   def print_inorder(node = self.root)
-    if node != nil
+    if node
       print_inorder(node.left)
       print "#{node.value}, "
       print_inorder(node.right)
@@ -104,7 +113,7 @@ class BST
   end
 
   def print_preorder(node = self.root)
-    if node != nil
+    if node
       print "#{node.value}, "
       print_preorder(node.left)
       print_preorder(node.right)
@@ -112,7 +121,7 @@ class BST
   end
 
   def print_postorder(node = self.root)
-    if node != nil
+    if node
       print_postorder(node.left)
       print_postorder(node.right)
       print "#{node.value}, "
@@ -120,44 +129,44 @@ class BST
   end
 
   def print_levelorder(node = self.root)
-    if node != nil
+    if node
       queue = []
       queue << node
       while queue.size > 0
         print "#{queue[0].value}, "
         node = queue.shift
-        queue << node.left if node.left != nil
-        queue << node.right if node.right != nil
+        queue << node.left if node.left
+        queue << node.right if node.right
       end
     end
   end
 
-  def ppi(node = self.root)
-    if node != nil
-      ppi(node.left)
-      @pi << "#{node.value} "
-      ppi(node.right)
+  def add_inorder(node = self.root)
+    if node
+      add_inorder(node.left)
+      @inorder_array << "#{node.value} "
+      add_inorder(node.right)
     end
   end
 
-  def ppp(node = self.root)
-    if node != nil
-      @pp << "#{node.value} "
-      ppp(node.left)
-      ppp(node.right)
+  def add_preorder(node = self.root)
+    if node
+      @preorder_array << "#{node.value} "
+      add_preorder(node.left)
+      add_preorder(node.right)
     end
   end
 
   def save()
-    @pi = []
-    @pp = []
+    @inorder_array = []
+    @preorder_array = []
     f = File.open("data_bst.txt","w+")
-    ppi()
-    ppp()
+    add_inorder()
+    add_preorder()
     inorder = ""
     preorder = ""
-    @pi.each{|n| inorder+=n.to_s}
-    @pp.each{|n| preorder+=n.to_s}
+    @inorder_array.each{|n| inorder+=n.to_s}
+    @preorder_array.each{|n| preorder+=n.to_s}
     f.write(inorder)
     f.write("\n")
     f.write(preorder)
@@ -166,13 +175,13 @@ class BST
     puts "file Saved\n\n"
   end
 
-  def pathp(node = self.root)
+  def print_paths(node = @root )
     path = []
-    printp(node, path, 0)
+    path_helper(node, path, 0)
   end
 
-  def printp(node, path, l)
-    return nil if node == nil
+  def path_helper(node, path, l)
+    return nil if !node
     if path.size > l
       path[l] = node.value
     else
@@ -180,11 +189,11 @@ class BST
     end
       
     l+=1
-    if node.left == nil && node.right == nil
+    if !node.left && !node.right
       printArr(path, l)
     else
-      printp(node.left, path, l)
-      printp(node.right, path, l)
+      path_helper(node.left, path, l)
+      path_helper(node.right, path, l)
     end
   end
 
@@ -193,28 +202,28 @@ class BST
     print "end\n"
   end
 
-  def remove(value, node = self.root)
-    rh(value, node = self.root)
+  def remove(value, node = @root)
+    rh(value, node = @root)
     @size -=1
     node
   end
 
   private
-  def rh(value, node = self.root)
-    return nil if node == nil
+
+  def rh(value, node = @root)
+    return nil if !node
     if node.value > value
       node.left = rh(value, node.left)
     elsif node.value < value
       node.right = rh(value, node.right)
     else
-      if node.left != nil && node.right != nil
-        temp = node
+      if node.left && node.right
         rmin = find_min(node.right)
         node.value = rmin.value
         node.right = rh(rmin.value, node.right)
-      elsif node.left != nil
+      elsif node.left
         node = node.left
-      elsif node.right != nil
+      elsif node.right
         node = node.right
       else
         node = nil
@@ -226,7 +235,7 @@ end
 
 t = BST.new()
 
-while true
+loop do
   puts "Select from the given options"
   puts "  Enter 0: to insert multiple elements"
   puts "  Enter 1: to insert value"
@@ -268,7 +277,7 @@ while true
   if option == 2
     puts "Enter the value you want to delete"
     v = gets.to_i
-    if t.contains?(v)
+    if t.does_it_contains(v)
       t.remove(v)
       puts "\n#{v} was deleted from the tree"
       puts "size of the tree now is #{t.size} \n\n"
@@ -303,20 +312,20 @@ while true
 
   if option == 6
     puts "Enter value to search it in treee"
-    v = t.contains(gets.to_i)
+    v = t.does_it_contains(gets.to_i)
     puts v ? "value exists" : "value does't exists"
     next
   end
 
   if option == 7
     puts "Printing all paths from Root"
-    t.pathp()
+    t.print_paths()
     puts "\n\n"
     next
   end
 
   if option == 8
-    t.loadit()
+    t.load_data()
     puts "Data loaded from the file\n\n"
   end
 end
