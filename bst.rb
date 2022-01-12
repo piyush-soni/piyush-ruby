@@ -36,7 +36,7 @@ class BST
   @inorder_array = []
   @preorder_array = []
 
-  def initialize()
+  def initialize
     @root = nil
     @size = 0
   end
@@ -62,7 +62,7 @@ class BST
     @size +=1
   end
 
-  def load_data()
+  def load_data
     f = open("data_bst.txt")
     arr = f.readlines.map(&:chomp)
     inorder = arr[0].split(" ").map(&:to_i)
@@ -164,12 +164,12 @@ class BST
     end
   end
 
-  def save()
+  def save
     @inorder_array = []
     @preorder_array = []
     f = File.open("data_bst.txt","w+")
-    add_inorder()
-    add_preorder()
+    add_inorder
+    add_preorder
     inorder = ""
     preorder = ""
     @inorder_array.each{|n| inorder+=n.to_s}
@@ -210,24 +210,24 @@ class BST
   end
 
   def remove(value, node = @root)
-    rh(value, node = @root)
+    remove_helper(value, node = @root)
     @size -=1
     node
   end
 
   private
 
-  def rh(value, node = @root)
+  def remove_helper(value, node = @root)
     return nil if !node
     if node.value > value
-      node.left = rh(value, node.left)
+      node.left = remove_helper(value, node.left)
     elsif node.value < value
-      node.right = rh(value, node.right)
+      node.right = remove_helper(value, node.right)
     else
       if node.left && node.right
         rmin = find_min(node.right)
         node.value = rmin.value
-        node.right = rh(rmin.value, node.right)
+        node.right = remove_helper(rmin.value, node.right)
       elsif node.left
         node = node.left
       elsif node.right
@@ -268,8 +268,8 @@ class LinkedList
 
   def find(value)
     node = @head
-    return false if node == nil
-    while node != nil
+    return false if !node
+    while node
       return true if node.value == value
       node = node.next
     end
@@ -277,7 +277,7 @@ class LinkedList
   end
 
   def delete(value)
-    if @head == nil || !find(value)
+    if @head || !find(value)
       puts "not in the list"
       return nil
     end
@@ -301,7 +301,7 @@ class LinkedList
     end
   end
 
-  def reverse()
+  def reverse
     return nil if @head == nil
     prev = nil
     curr = @head
@@ -314,7 +314,7 @@ class LinkedList
     @head = prev
   end
 
-  def printll()
+  def printll
     if @head == nil
       puts "Empty list"
       return nil
@@ -331,8 +331,8 @@ class LinkedList
 end
 
 
-t = BST.new()
-ll = LinkedList.new()
+t = BST.new
+ll = LinkedList.new
 
 def ll_menu(ll)
   loop do
@@ -373,12 +373,12 @@ def ll_menu(ll)
 
     if option == 4
       puts "the linked list is reversed"
-      ll.reverse()
+      ll.reverse
       next
     end
 
     if option == 5
-      ll.printll()
+      ll.printll
       next
     end
   end
@@ -403,7 +403,7 @@ def bst_menu(t)
     option = gets.chomp
     system("clear")
     if !option.is_i?
-      t.save() if option.downcase == "quit"
+      t.save if option.downcase == "quit"
       break
     end
     option = option.to_i
@@ -440,24 +440,24 @@ def bst_menu(t)
 
     if option == 3
       puts "Printing the tree in InOrder"
-      t.print_inorder()
+      t.print_inorder
       puts "end\n Printing the tree in PreOrder"
-      t.print_preorder()
+      t.print_preorder
       puts "end\n Printing the tree in PostOrder"
-      t.print_postorder()
+      t.print_postorder
       puts "end\n Printing the tree in LevelOrder"
-      t.print_levelorder()
+      t.print_levelorder
       puts "end\n\n"
       next
     end
 
     if option == 4
-      puts "the maximum is #{t.find_max().value}\n\n"
+      puts "the maximum is #{t.find_max.value}\n\n"
       next
     end
 
     if option == 5
-      puts "the minimum is #{t.find_min().value}\n\n"
+      puts "the minimum is #{t.find_min.value}\n\n"
       next
     end
 
@@ -470,13 +470,13 @@ def bst_menu(t)
 
     if option == 7
       puts "Printing all paths from Root"
-      t.print_paths()
+      t.print_paths
       puts "\n\n"
       next
     end
 
     if option == 8
-      t.load_data()
+      t.load_data
       puts "Data loaded from the file\n\n"
     end
   end
